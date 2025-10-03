@@ -1,0 +1,11 @@
+[
+  {
+    "name": "Bins out",
+    "frequency_days": 7,
+    "start_date": "2025-10-01",
+    "rotate": true,
+    "assignees": ["Jeff", "Alex", "Sam", "Priya"],
+    "grace_days": 1,
+    "label": "chore:bins"
+  }
+]
