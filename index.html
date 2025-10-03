@@ -84,7 +84,7 @@
     <!-- Schedule table -->
     <section id="schedule" class="card p-4">
       <div class="flex items-center justify-between mb-3">
-        <h2 class="text-lg font-semibold">Schedule (next 8 weeks)</h2>
+        <h2 class="text-lg font-semibold">Schedule (next 2 weeks)</h2>
         <button id="exportCsvBtn" class="text-sm underline">Export CSV</button>
       </div>
       <div class="overflow-x-auto">
@@ -139,6 +139,7 @@
     /** @typedef {{ name:string, frequency_days:number, start_date:string, rotate:boolean, assignees:string[], grace_days?:number, label?:string }} Chore */
 
     // ---------- State ----------
+    const HORIZON_WEEKS = 2;
     const state = {
       owner: localStorage.getItem('chorehub_owner') || '',
       repo: localStorage.getItem('chorehub_repo') || '',
@@ -216,7 +217,7 @@
     // ---------- Scheduling ----------
     /** Build next ~8 weeks of schedule from chores.json and issue history */
     function buildSchedule() {
-      const weeks = 8; // horizon
+      const weeks = HORIZON_WEEKS; // horizon
       const end = dayjs().add(weeks, 'week').endOf('week');
       const rows = [];
 
@@ -331,7 +332,7 @@
 
     function renderScheduleTable() {
       const tbody = el('scheduleBody');
-      const horizon = dayjs().add(8, 'week');
+      const horizon = dayjs().add(HORIZON_WEEKS, 'week');
       const rows = state.schedule.filter(r => r.due.isBefore(horizon));
       tbody.innerHTML = rows.map(r => {
         const st = r.status === 'done' ? pill('Done','bg-emerald-100 text-emerald-700')
