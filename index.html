@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Flatmates Chore Hub</title>
+  <meta name="description" content="A zero-backend chore tracker that runs on GitHub Pages using GitHub Issues as the log and a JSON config for chores." />
+  <!-- Tailwind (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js (charts) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- Day.js (dates) -->
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/utc.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/timezone.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/isoWeek.js"></script>
+  <script>
+    dayjs.extend(dayjs_plugin_utc);
+    dayjs.extend(dayjs_plugin_timezone);
+    dayjs.extend(dayjs_plugin_isoWeek);
+  </script>
+  <style>
+    html, body { height: 100%; }
+    .card { @apply rounded-2xl shadow-md border border-slate-200 bg-white; }
+    .pill { @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium; }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-800">
+  <header class="sticky top-0 z-30 bg-white/80 backdrop-blur border-b">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+      <h1 class="text-2xl font-bold">🏠 Flatmates Chore Hub</h1>
+      <nav class="flex gap-2 text-sm">
+        <a href="#dashboard" class="hover:underline">Dashboard</a>
+        <a href="#schedule" class="hover:underline">Schedule</a>
+        <a href="#stats" class="hover:underline">Stats</a>
+        <a href="#how" class="hover:underline">How it works</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto p-4 space-y-6">
+    <!-- Config panel -->
+    <section class="card p-4" id="config">
+      <div class="flex flex-col md:flex-row md:items-end gap-4">
+        <div class="grow">
+          <h2 class="text-lg font-semibold mb-2">Repository settings</h2>
+          <p class="text-sm text-slate-600">This site is static and free on GitHub Pages. It reads chore definitions from a JSON file in your repo and logs completions via GitHub Issues. Fill these in to connect your data.</p>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 w-full md:w-auto">
+          <label class="text-sm">
+            <span class="block mb-1">Owner/org</span>
+            <input id="owner" class="w-full border rounded-lg px-3 py-2" placeholder="e.g. jeffusername" />
+          </label>
+          <label class="text-sm">
+            <span class="block mb-1">Repo</span>
+            <input id="repo" class="w-full border rounded-lg px-3 py-2" placeholder="e.g. flat-chores" />
+          </label>
+          <label class="text-sm">
+            <span class="block mb-1">Branch</span>
+            <input id="branch" class="w-full border rounded-lg px-3 py-2" value="main" />
+          </label>
+          <label class="text-sm">
+            <span class="block mb-1">Chores file path</span>
+            <input id="choresPath" class="w-full border rounded-lg px-3 py-2" value="/chores.json" />
+          </label>
+        </div>
+        <button id="loadBtn" class="h-10 px-4 rounded-xl bg-slate-900 text-white font-medium">Load</button>
+      </div>
+      <div id="configStatus" class="mt-3 text-sm text-slate-600"></div>
+    </section>
+
+    <!-- Dashboard -->
+    <section id="dashboard" class="grid md:grid-cols-3 gap-4">
+      <div class="card p-4 md:col-span-2">
+        <h2 class="text-lg font-semibold mb-3">Upcoming & Overdue</h2>
+        <div id="upcomingList" class="divide-y"></div>
+      </div>
+      <div class="card p-4">
+        <h2 class="text-lg font-semibold mb-3">Who's up next?</h2>
+        <div id="nextAssignees" class="space-y-2"></div>
+      </div>
+    </section>
+
+    <!-- Schedule table -->
+    <section id="schedule" class="card p-4">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-lg font-semibold">Schedule (next 8 weeks)</h2>
+        <button id="exportCsvBtn" class="text-sm underline">Export CSV</button>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-left border-b">
+              <th class="py-2 pr-2">Date</th>
+              <th class="py-2 pr-2">Chore</th>
+              <th class="py-2 pr-2">Assignee</th>
+              <th class="py-2 pr-2">Status</th>
+              <th class="py-2">Action</th>
+            </tr>
+          </thead>
+          <tbody id="scheduleBody" class="divide-y"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Stats -->
+    <section id="stats" class="grid md:grid-cols-2 gap-4">
+      <div class="card p-4">
+        <h2 class="text-lg font-semibold mb-3">Consistency by person</h2>
+        <canvas id="consistencyChart" height="200"></canvas>
+      </div>
+      <div class="card p-4">
+        <h2 class="text-lg font-semibold mb-3">Completions (last 12 weeks)</h2>
+        <canvas id="completionsChart" height="200"></canvas>
+      </div>
+      <div class="card p-4 md:col-span-2">
+        <h2 class="text-lg font-semibold mb-3">Leaderboard</h2>
+        <div id="leaderboard" class="grid sm:grid-cols-2 md:grid-cols-3 gap-3"></div>
+      </div>
+    </section>
+
+    <!-- How it works -->
+    <section id="how" class="card p-4">
+      <h2 class="text-lg font-semibold mb-2">How it works (zero backend)</h2>
+      <ol class="list-decimal pl-6 space-y-2 text-sm text-slate-700">
+        <li>Create a <code>chores.json</code> file in your repo (root by default). This defines chores, frequencies, and rotation.</li>
+        <li>Add an Issue Form template called <code>chore-completion.yml</code> to <code>.github/ISSUE_TEMPLATE/</code>. Completions are logged as Issues.</li>
+        <li>Optionally add labels like <code>chore</code> and <code>completed</code> to your repo for tidy filtering.</li>
+        <li>Share this page (GitHub Pages URL). Flatmates click <em>Mark done</em> which opens a pre-filled GitHub Issue form. After they submit, it appears here automatically.</li>
+      </ol>
+      <p class="mt-2 text-sm text-slate-600">Tip: Make the repo public so everyone can open issues with a free GitHub account. This page only reads public data; no tokens required.</p>
+    </section>
+
+    <footer class="py-6 text-center text-xs text-slate-500">Built for GitHub Pages · Works entirely client-side</footer>
+  </main>
+
+  <script>
+    // ---------- Types ----------
+    /** @typedef {{ name:string, frequency_days:number, start_date:string, rotate:boolean, assignees:string[], grace_days?:number, label?:string }} Chore */
+
+    // ---------- State ----------
+    const state = {
+      owner: localStorage.getItem('chorehub_owner') || '',
+      repo: localStorage.getItem('chorehub_repo') || '',
+      branch: localStorage.getItem('chorehub_branch') || 'main',
+      choresPath: localStorage.getItem('chorehub_choresPath') || '/chores.json',
+      chores: /** @type {Chore[]} */([]),
+      schedule: [],
+      issues: [],
+      people: new Set(),
+    };
+
+    // ---------- Elements ----------
+    const el = (id) => document.getElementById(id);
+    const $status = el('configStatus');
+    el('owner').value = state.owner; el('repo').value = state.repo; el('branch').value = state.branch; el('choresPath').value = state.choresPath;
+
+    el('loadBtn').addEventListener('click', () => {
+      state.owner = el('owner').value.trim();
+      state.repo = el('repo').value.trim();
+      state.branch = el('branch').value.trim();
+      state.choresPath = el('choresPath').value.trim();
+      localStorage.setItem('chorehub_owner', state.owner);
+      localStorage.setItem('chorehub_repo', state.repo);
+      localStorage.setItem('chorehub_branch', state.branch);
+      localStorage.setItem('chorehub_choresPath', state.choresPath);
+      loadAll();
+    });
+
+    // Auto-load if prefilled
+    if (state.owner && state.repo) {
+      loadAll();
+    }
+
+    // ---------- Data fetching ----------
+    async function loadAll() {
+      $status.textContent = 'Loading chores.json and issues…';
+      try {
+        const choresUrl = `https://raw.githubusercontent.com/${state.owner}/${state.repo}/${state.branch}${state.choresPath}`;
+        const chores = await fetch(choresUrl, { cache: 'no-store' }).then(r => {
+          if (!r.ok) throw new Error('Cannot fetch chores.json');
+          return r.json();
+        });
+        state.chores = chores;
+        state.people = new Set(chores.flatMap(c => c.assignees));
+
+        const issues = await fetchIssues();
+        state.issues = issues;
+
+        buildSchedule();
+        renderAll();
+        $status.textContent = 'Loaded ✓';
+      } catch (e) {
+        console.error(e);
+        $status.innerHTML = `<span class="text-red-600">${e.message}. Make sure the repo and path are correct.</span>`;
+      }
+    }
+
+    async function fetchIssues(page = 1, acc = []) {
+      // We fetch issues with label 'chore' to avoid noise; but we also accept all then filter by our template marker in body.
+      const url = new URL(`https://api.github.com/repos/${state.owner}/${state.repo}/issues`);
+      url.searchParams.set('state', 'all');
+      url.searchParams.set('per_page', '100');
+      url.searchParams.set('page', String(page));
+      // If you add a label named 'chore', uncomment below
+      // url.searchParams.set('labels', 'chore');
+      const res = await fetch(url, { headers: { 'Accept': 'application/vnd.github+json' }, cache: 'no-store' });
+      if (!res.ok) throw new Error('Failed to fetch issues');
+      const data = await res.json();
+      const filtered = data.filter(i => !i.pull_request); // exclude PRs
+      acc.push(...filtered);
+      if (data.length === 100) return fetchIssues(page + 1, acc);
+      return acc;
+    }
+
+    // ---------- Scheduling ----------
+    /** Build next ~8 weeks of schedule from chores.json and issue history */
+    function buildSchedule() {
+      const weeks = 8; // horizon
+      const end = dayjs().add(weeks, 'week').endOf('week');
+      const rows = [];
+
+      for (const chore of state.chores) {
+        const start = dayjs(chore.start_date);
+        const freq = chore.frequency_days;
+        const grace = chore.grace_days ?? 1;
+        if (!start.isValid() || !freq) continue;
+
+        // Build due dates until horizon
+        let due = start.startOf('day');
+        let idx = 0; // rotation index
+        while (due.isBefore(end)) {
+          const assignee = chore.rotate && chore.assignees.length
+            ? chore.assignees[idx % chore.assignees.length]
+            : (chore.assignees[0] || 'Unassigned');
+
+          rows.push({
+            chore: chore.name,
+            assignee,
+            due: due,
+            graceDays: grace,
+            label: chore.label || `chore:${slug(chore.name)}`,
+          });
+
+          due = due.add(freq, 'day');
+          idx++;
+        }
+      }
+
+      // Determine completion status from issues (Issue Form fields)
+      const completions = parseCompletions(state.issues);
+
+      for (const r of rows) {
+        const key = `${r.chore}|${r.assignee}|${r.due.format('YYYY-MM-DD')}`;
+        const match = completions.get(key);
+        if (match) {
+          r.completedAt = dayjs(match.completed_at);
+          r.completedBy = match.who;
+          r.issueUrl = match.url;
+        }
+        const overdue = dayjs().isAfter(r.due.add(r.graceDays, 'day'));
+        r.status = match ? 'done' : (overdue ? 'overdue' : (dayjs().isAfter(r.due) ? 'due' : 'upcoming'));
+        r.onTime = match ? (r.completedAt.isSame(r.due) || r.completedAt.isBefore(r.due.add(r.graceDays, 'day'))) : null;
+      }
+
+      state.schedule = rows.sort((a,b) => a.due.valueOf() - b.due.valueOf());
+    }
+
+    function parseCompletions(issues) {
+      /**
+       * Issue form expected fields in the body as markdown (name: value), e.g.:
+       * Chore: Bins
+       * Due date (YYYY-MM-DD): 2025-10-01
+       * Assignee: Alex
+       * Completed by: Alex
+       */
+      const map = new Map();
+      for (const i of issues) {
+        const body = (i.body || '').toLowerCase();
+        if (!body.includes('chore:')) continue; // simple guard
+        const lines = (i.body || '').split('\n');
+        const vals = {};
+        for (const line of lines) {
+          const m = line.match(/^\s*([A-Za-z ()]+):\s*(.+)$/);
+          if (m) vals[m[1].trim().toLowerCase()] = m[2].trim();
+        }
+        const chore = vals['chore'];
+        const dueStr = vals['due date (yyyy-mm-dd)'] || vals['due date'];
+        const assignee = vals['assignee'];
+        const completedBy = vals['completed by'] || i.user?.login || '';
+        if (!chore || !dueStr || !assignee) continue;
+        const due = dayjs(dueStr).format('YYYY-MM-DD');
+        const key = `${chore}|${assignee}|${due}`;
+        map.set(key, { url: i.html_url, who: completedBy, completed_at: i.closed_at || i.updated_at || i.created_at });
+      }
+      return map;
+    }
+
+    // ---------- Rendering ----------
+    function renderAll() {
+      renderUpcoming();
+      renderScheduleTable();
+      renderNextAssignees();
+      renderStats();
+    }
+
+    function pill(text, cls) { return `<span class="pill ${cls}">${text}</span>` }
+
+    function renderUpcoming() {
+      const container = el('upcomingList');
+      const items = state.schedule.filter(r => ['overdue','due','upcoming'].includes(r.status)).slice(0, 15);
+      container.innerHTML = items.map(r => {
+        const d = r.due.format('ddd, D MMM');
+        const st = r.status === 'done' ? pill('Done','bg-emerald-100 text-emerald-700')
+          : r.status === 'overdue' ? pill('Overdue','bg-rose-100 text-rose-700')
+          : r.status === 'due' ? pill('Due','bg-amber-100 text-amber-700')
+          : pill('Upcoming','bg-slate-100 text-slate-700');
+        const markUrl = issueUrlFor(r);
+        const action = r.status === 'done'
+          ? `<a class="text-sm underline" href="${r.issueUrl}" target="_blank">View log</a>`
+          : `<a class="text-sm underline" href="${markUrl}" target="_blank">Mark done →</a>`;
+        return `<div class="py-2 flex items-center justify-between">
+          <div>
+            <div class="font-medium">${r.chore}</div>
+            <div class="text-xs text-slate-600">${d} · ${r.assignee}</div>
+          </div>
+          <div class="flex items-center gap-3">${st}${action}</div>
+        </div>`;
+      }).join('');
+    }
+
+    function renderScheduleTable() {
+      const tbody = el('scheduleBody');
+      const horizon = dayjs().add(8, 'week');
+      const rows = state.schedule.filter(r => r.due.isBefore(horizon));
+      tbody.innerHTML = rows.map(r => {
+        const st = r.status === 'done' ? pill('Done','bg-emerald-100 text-emerald-700')
+          : r.status === 'overdue' ? pill('Overdue','bg-rose-100 text-rose-700')
+          : r.status === 'due' ? pill('Due','bg-amber-100 text-amber-700')
+          : pill('Upcoming','bg-slate-100 text-slate-700');
+        const action = r.status === 'done'
+          ? `<a class="underline" href="${r.issueUrl}" target="_blank">View log</a>`
+          : `<a class="underline" href="${issueUrlFor(r)}" target="_blank">Mark done</a>`;
+        return `<tr>
+          <td class="py-2 pr-2">${r.due.format('YYYY-MM-DD')}</td>
+          <td class="py-2 pr-2">${r.chore}</td>
+          <td class="py-2 pr-2">${r.assignee}</td>
+          <td class="py-2 pr-2">${st} ${r.onTime===false?pill('Late','bg-amber-100 text-amber-700'):''}</td>
+          <td class="py-2">${action}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    function renderNextAssignees() {
+      const box = el('nextAssignees');
+      const nextByChore = groupBy(state.schedule.filter(r => ['upcoming','due'].includes(r.status)), 'chore', arr => arr[0]);
+      box.innerHTML = Object.values(nextByChore).map(r => {
+        return `<div class="flex items-center justify-between border rounded-xl px-3 py-2">
+          <div>
+            <div class="font-medium">${r.chore}</div>
+            <div class="text-xs text-slate-600">${r.assignee} on ${r.due.format('ddd, D MMM')}</div>
+          </div>
+          <a class="text-sm underline" href="${issueUrlFor(r)}" target="_blank">Mark done</a>
+        </div>`
+      }).join('');
+    }
+
+    function renderStats() {
+      const people = Array.from(state.people);
+      const last12w = dayjs().subtract(12, 'week');
+      const perPerson = Object.fromEntries(people.map(p => [p, { total:0, onTime:0, late:0 }]));
+      const weekly = new Map(); // week -> count
+
+      for (const r of state.schedule) {
+        if (r.completedAt && dayjs(r.completedAt).isAfter(last12w)) {
+          perPerson[r.assignee].total++;
+          if (r.onTime) perPerson[r.assignee].onTime++; else perPerson[r.assignee].late++;
+          const wk = dayjs(r.completedAt).isoWeek();
+          weekly.set(wk, (weekly.get(wk) || 0) + 1);
+        }
+      }
+
+      // Consistency chart
+      const ctx1 = document.getElementById('consistencyChart');
+      const labels1 = people;
+      const data1 = labels1.map(p => {
+        const d = perPerson[p];
+        const pct = d.total ? Math.round((d.onTime / d.total) * 100) : 0;
+        return pct;
+      });
+      new Chart(ctx1, { type: 'bar', data: { labels: labels1, datasets: [{ label: 'On-time %', data: data1 }] }, options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: 100 } } } });
+
+      // Completions time-series (by ISO week)
+      const weeks = Array.from({length:12}).map((_,i)=> dayjs().subtract(11-i,'week').isoWeek());
+      const data2 = weeks.map(w => weekly.get(w) || 0);
+      const ctx2 = document.getElementById('completionsChart');
+      new Chart(ctx2, { type: 'line', data: { labels: weeks.map(w=>`W${String(w).padStart(2,'0')}`), datasets: [{ label: 'Completions', data: data2, tension: 0.3 }] }, options: { responsive: true } });
+
+      // Leaderboard
+      const board = el('leaderboard');
+      const rows = people.map(p => {
+        const d = perPerson[p];
+        const pct = d.total ? Math.round((d.onTime / d.total) * 100) : 0;
+        return { person: p, ...d, pct };
+      }).sort((a,b)=> b.pct - a.pct || b.total - a.total);
+      board.innerHTML = rows.map(r => `<div class="p-4 border rounded-2xl">
+        <div class="text-sm text-slate-500">${r.person}</div>
+        <div class="text-2xl font-bold">${r.pct}% on-time</div>
+        <div class="text-xs text-slate-600">${r.onTime}/${r.total} on-time · ${r.late} late</div>
+      </div>`).join('');
+    }
+
+    // ---------- Helpers ----------
+    function slug(s){ return s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''); }
+    function groupBy(arr, key, mapfn){
+      const map = {}; for(const item of arr){ const k = item[key]; if(!map[k]) map[k]=[]; map[k].push(item); }
+      const out = {}; for(const [k,v] of Object.entries(map)){ out[k] = mapfn? mapfn(v): v; } return out;
+    }
+    function issueUrlFor(row){
+      // Link to new issue with our Issue Form template
+      const base = `https://github.com/${state.owner}/${state.repo}/issues/new?template=chore-completion.yml`;
+      const params = new URLSearchParams({
+        'chore': row.chore,
+        'due_date': row.due.format('YYYY-MM-DD'),
+        'assignee': row.assignee,
+        'title': `${row.chore} · ${row.due.format('YYYY-MM-DD')} · ${row.assignee}`
+      });
+      return `${base}&${params.toString()}`;
+    }
+
+    // ---------- Export CSV ----------
+    el('exportCsvBtn').addEventListener('click', () => {
+      const header = ['date','chore','assignee','status','on_time','completed_at','issue_url'];
+      const lines = [header.join(',')];
+      for (const r of state.schedule) {
+        lines.push([
+          r.due.format('YYYY-MM-DD'),
+          csv(r.chore),
+          csv(r.assignee),
+          r.status,
+          r.onTime===null?'':r.onTime,
+          r.completedAt?dayjs(r.completedAt).toISOString():'',
+          r.issueUrl||''
+        ].join(','));
+      }
+      const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'chore-schedule.csv';
+      a.click();
+    });
+    function csv(v){ return '"'+String(v).replaceAll('"','""')+'"'; }
+  </script>
+</body>
+</html>
