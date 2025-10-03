@@ -1,0 +1,37 @@
+name: Chore completion
+description: Log a completed chore
+title: "{% raw %}{{title}}{% endraw %}"
+labels: ["chore","completed"]
+body:
+  - type: input
+    id: chore
+    attributes:
+      label: Chore
+      description: Exact chore name from chores.json
+      placeholder: e.g. Bins out
+      value: "{% raw %}{{chore}}{% endraw %}"
+    validations:
+      required: true
+  - type: input
+    id: due_date
+    attributes:
+      label: Due date (YYYY-MM-DD)
+      description: The scheduled due date
+      placeholder: 2025-10-03
+      value: "{% raw %}{{due_date}}{% endraw %}"
+    validations:
+      required: true
+  - type: input
+    id: assignee
+    attributes:
+      label: Assignee
+      description: Who was scheduled
+      value: "{% raw %}{{assignee}}{% endraw %}"
+    validations:
+      required: true
+  - type: input
+    id: completed_by
+    attributes:
+      label: Completed by
+      description: Who actually did it (can differ)
+      placeholder: e.g. Jeff
