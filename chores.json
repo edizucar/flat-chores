@@ -1,29 +1,128 @@
 [
   {
-    "name": "Bins out",
-    "frequency_days": 7,
-    "start_date": "2025-10-01",
+    "name": "Daily dishes & kitchen tidy",
+    "frequency_days": 1,
+    "start_date": "2025-10-06",
     "rotate": true,
-    "assignees": ["Jeff", "Alex", "Sam", "Priya"],
+    "assignees": ["ediz", "michal", "matthew"],
+    "grace_days": 0,
+    "label": "chore:daily-dishes"
+  },
+  {
+    "name": "Bins & recycling out",
+    "frequency_days": 7,
+    "start_date": "2025-10-06",
+    "rotate": true,
+    "assignees": ["michal", "matthew", "ediz"],
     "grace_days": 1,
     "label": "chore:bins"
   },
   {
-    "name": "Kitchen deep clean",
-    "frequency_days": 14,
-    "start_date": "2025-10-05",
+    "name": "Kitchen surfaces & hob clean",
+    "frequency_days": 7,
+    "start_date": "2025-10-06",
     "rotate": true,
-    "assignees": ["Alex", "Priya", "Jeff", "Sam"],
-    "grace_days": 2,
-    "label": "chore:kitchen"
+    "assignees": ["matthew", "ediz", "michal"],
+    "grace_days": 1,
+    "label": "chore:kitchen-surfaces"
   },
   {
-    "name": "Hoover hallway",
+    "name": "Fridge check & leftovers clear",
     "frequency_days": 7,
-    "start_date": "2025-10-03",
+    "start_date": "2025-10-06",
     "rotate": true,
-    "assignees": ["Sam", "Jeff", "Alex", "Priya"],
+    "assignees": ["ediz", "michal", "matthew"],
     "grace_days": 1,
-    "label": "chore:hoover"
+    "label": "chore:fridge-check"
+  },
+  {
+    "name": "Toilet room clean (toilet + sink)",
+    "frequency_days": 7,
+    "start_date": "2025-10-06",
+    "rotate": true,
+    "assignees": ["michal", "matthew", "ediz"],
+    "grace_days": 1,
+    "label": "chore:toilet-room"
+  },
+  {
+    "name": "Bathroom clean (sink + bath/shower)",
+    "frequency_days": 7,
+    "start_date": "2025-10-06",
+    "rotate": true,
+    "assignees": ["matthew", "ediz", "michal"],
+    "grace_days": 1,
+    "label": "chore:bathroom"
+  },
+  {
+    "name": "Vacuum & mop (corridor, living room, kitchen)",
+    "frequency_days": 7,
+    "start_date": "2025-10-06",
+    "rotate": true,
+    "assignees": ["ediz", "michal", "matthew"],
+    "grace_days": 1,
+    "label": "chore:vacuum-mop"
+  },
+  {
+    "name": "Living room dust & tidy",
+    "frequency_days": 14,
+    "start_date": "2025-10-06",
+    "rotate": true,
+    "assignees": ["michal", "matthew", "ediz"],
+    "grace_days": 2,
+    "label": "chore:living-room-dust"
+  },
+  {
+    "name": "Corridor tidy (shoes, spots, skirting)",
+    "frequency_days": 14,
+    "start_date": "2025-10-06",
+    "rotate": true,
+    "assignees": ["matthew", "ediz", "michal"],
+    "grace_days": 2,
+    "label": "chore:corridor-tidy"
+  },
+  {
+    "name": "Microwave & small appliances wipe",
+    "frequency_days": 14,
+    "start_date": "2025-10-06",
+    "rotate": true,
+    "assignees": ["ediz", "michal", "matthew"],
+    "grace_days": 2,
+    "label": "chore:appliances-wipe"
+  },
+  {
+    "name": "Oven clean (light clean)",
+    "frequency_days": 28,
+    "start_date": "2025-10-06",
+    "rotate": true,
+    "assignees": ["michal", "matthew", "ediz"],
+    "grace_days": 3,
+    "label": "chore:oven"
+  },
+  {
+    "name": "Windows & mirrors (common areas)",
+    "frequency_days": 28,
+    "start_date": "2025-10-06",
+    "rotate": true,
+    "assignees": ["matthew", "ediz", "michal"],
+    "grace_days": 3,
+    "label": "chore:windows-mirrors"
+  },
+  {
+    "name": "Descale kettle & shower head",
+    "frequency_days": 28,
+    "start_date": "2025-10-06",
+    "rotate": true,
+    "assignees": ["ediz", "michal", "matthew"],
+    "grace_days": 3,
+    "label": "chore:descale"
+  },
+  {
+    "name": "Take out recycling (cardboard/clean plastics)",
+    "frequency_days": 7,
+    "start_date": "2025-10-06",
+    "rotate": true,
+    "assignees": ["michal", "matthew", "ediz"],
+    "grace_days": 1,
+    "label": "chore:recycling"
   }
 ]
