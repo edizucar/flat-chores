@@ -8,49 +8,4 @@
     "grace_days": 1,
     "label": "chore:kitchen-surfaces"
   },
-  {
-    "name": "Fridge check & leftovers clear",
-    "frequency_days": 7,
-    "start_date": "2025-10-06",
-    "rotate": true,
-    "assignees": ["ediz", "michal", "matthew"],
-    "grace_days": 1,
-    "label": "chore:fridge-check"
-  },
-  {
-    "name": "Bathrooms clean (sink + bath/shower)",
-    "frequency_days": 7,
-    "start_date": "2025-10-06",
-    "rotate": true,
-    "assignees": ["matthew", "ediz", "michal"],
-    "grace_days": 1,
-    "label": "chore:bathroom"
-  },
-  {
-    "name": "Vacuum (corridor, living room, kitchen)",
-    "frequency_days": 7,
-    "start_date": "2025-10-06",
-    "rotate": true,
-    "assignees": ["ediz", "michal", "matthew"],
-    "grace_days": 1,
-    "label": "chore:vacuum-mop"
-  },
-  {
-    "name": "Living room dust & tidy",
-    "frequency_days": 14,
-    "start_date": "2025-10-06",
-    "rotate": true,
-    "assignees": ["michal", "matthew", "ediz"],
-    "grace_days": 2,
-    "label": "chore:living-room-dust"
-  },
-  {
-    "name": "Windows & mirrors (common areas)",
-    "frequency_days": 28,
-    "start_date": "2025-10-06",
-    "rotate": true,
-    "assignees": ["matthew", "ediz", "michal"],
-    "grace_days": 3,
-    "label": "chore:windows-mirrors"
-  }
 ]
