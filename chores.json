@@ -52,5 +52,5 @@
     "assignees": ["matthew", "ediz", "michal"],
     "grace_days": 3,
     "label": "chore:windows-mirrors"
-  },
+  }
 ]
