@@ -1,0 +1,29 @@
+[
+  {
+    "name": "Bins out",
+    "frequency_days": 7,
+    "start_date": "2025-10-01",
+    "rotate": true,
+    "assignees": ["Jeff", "Alex", "Sam", "Priya"],
+    "grace_days": 1,
+    "label": "chore:bins"
+  },
+  {
+    "name": "Kitchen deep clean",
+    "frequency_days": 14,
+    "start_date": "2025-10-05",
+    "rotate": true,
+    "assignees": ["Alex", "Priya", "Jeff", "Sam"],
+    "grace_days": 2,
+    "label": "chore:kitchen"
+  },
+  {
+    "name": "Hoover hallway",
+    "frequency_days": 7,
+    "start_date": "2025-10-03",
+    "rotate": true,
+    "assignees": ["Sam", "Jeff", "Alex", "Priya"],
+    "grace_days": 1,
+    "label": "chore:hoover"
+  }
+]
